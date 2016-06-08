@@ -15,6 +15,9 @@ class Khonjin extends FlxSprite
 												//it makes things feel very nice for the player.
 	private var coyoteTime:Float = 0; 
 	
+	private var climbing:Bool = false;
+	private var ladder:Array<Float> = [0,0,0,0]; 
+	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y, null);
@@ -51,6 +54,8 @@ class Khonjin extends FlxSprite
 			velocity.x *= GlobalValues.friction;
 		}
 
+		//Attempt at ladders needs more reading
+		
 		super.update(elapsed);
 		
 	}
