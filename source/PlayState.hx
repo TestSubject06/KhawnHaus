@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.addons.editors.ogmo.FlxOgmoLoader;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
 import flixel.tile.FlxTile;
@@ -22,8 +23,16 @@ class PlayState extends FlxState
 	private var background:FlxSprite;
 	private var khonjin:Khonjin;
 	private var level:FlxTilemap;
+	
+	//visual layering
+	private var backgroundLayer:FlxGroup;
+	private var entitiesLayer:FlxGroup;
+	private var foregroundLayer:FlxGroup;
+	private var uiLayer:FlxGroup;
 	override public function create():Void
 	{		
+		
+		//We shouldn't be handling resolution like this.
 		FlxG.camera.width = 1920;
 		FlxG.camera.height = 1080;
 		FlxG.camera.x = -560;
@@ -33,46 +42,38 @@ class PlayState extends FlxState
 		super.create();
 		FlxG.worldBounds.set( -100, -100, 1920 + 200, 1080 + 200);
 		
-		background = new FlxSprite(0, 0, AssetPaths.backgroundflat__png);
-		background.origin.set(0,0); // Resize from top-left corner
-		add(background);
+		backgroundLayer = new FlxGroup();
+		entitiesLayer = new FlxGroup();
+		foregroundLayer = new FlxGroup();
+		uiLayer = new FlxGroup();
+		add(backgroundLayer);
+		add(entitiesLayer);
+		add(foregroundLayer);
+		add(uiLayer);
 		
-		walls = new FlxGroup();
-		var leftwall:FlxObject = new FlxObject( -32, -1080, 32, 2160); // values taken from Adobe Fireworks vector bounds in background-meta.png
-		    leftwall.immovable = true;
-		var rigtwall:FlxObject = new FlxObject(1920, -1080, 32, 2160);
-		    rigtwall.immovable = true;
-		walls.add(leftwall);
-		walls.add(rigtwall);
-		add(walls);
+		var levelCreator = new FlxOgmoLoader(AssetPaths.Level1__oel);
+		level = levelCreator.loadTilemap(AssetPaths.autotiles__png, 32, 32, "TilesLayer");
+		add(level);
 		
 		floors = new FlxGroup();
-		var floor1:FlxObject = new FlxObject( 0, 1038, 1920, 42);
-		    floor1.immovable = true;
-		var floor2:FlxObject = new FlxObject( 0, 673, 1920, 50);
-		    floor2.immovable = true;
-		var floor3:FlxObject = new FlxObject( 0, 312, 1920, 51);
-		    floor3.immovable = true;
-		floors.add(floor1);
-		floors.add(floor2);
-		floors.add(floor3);
-		add(floors);		
 		
-		ladders = new FlxGroup();
-		var ladder1:FlxObject = new FlxObject(1739, 632, 111, 406);
-		    ladder1.immovable = true;
-		var ladder2:FlxObject = new FlxObject(107, 264, 109, 409);
-		    ladder2.immovable = true;
-		ladders.add(ladder1);
-		ladders.add(ladder2);
-		add(ladders);
-		
-		//level = new FlxTilemap();
-		//level.loadMapFromCSV(AssetPaths.SomeWalls__csv, AssetPaths.autotiles__png, 32, 32, AUTO);
-		//add(level);
+		levelCreator.loadEntities(function(itemType:String, itemData:Xml):Void {
+			switch(itemType.toLowerCase()) {
+				case "platform":
+					var newPlatform:FlxSprite = new FlxSprite(Std.parseFloat(itemData.get("x")), Std.parseFloat(itemData.get("y")));
+					newPlatform.makeGraphic(Std.parseInt(itemData.get("width")), Std.parseInt(itemData.get("height")), 0xFFFF0000);
+					newPlatform.immovable = true;
+					floors.add(newPlatform);
+					entitiesLayer.add(newPlatform);
+				
+				case "background1":
+					background = new FlxSprite(Std.parseFloat(itemData.get("x")), Std.parseFloat(itemData.get("y")), AssetPaths.backgroundflat__png);
+					backgroundLayer.add(background);
+			}
+		}, "EntitiesLayer");
 		
 		khonjin = new Khonjin(50, 900);
-		add(khonjin);
+		entitiesLayer.add(khonjin);
 		
 	}
 
@@ -82,6 +83,10 @@ class PlayState extends FlxState
 		
 		FlxG.collide(walls, khonjin);
 		FlxG.collide(floors, khonjin);
-		//FlxG.collide(level, khonjin);
+		FlxG.collide(level, khonjin);
+		
+		if (FlxG.keys.justPressed.ESCAPE) {
+			Sys.exit(0);
+		}
 	}
 }
