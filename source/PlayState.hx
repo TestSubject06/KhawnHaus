@@ -12,6 +12,7 @@ import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import menus.PauseMenu;
 import player.Khonjin;
 import world.Ladder;
 
@@ -34,12 +35,6 @@ class PlayState extends FlxState
 	{		
 		
 		//We shouldn't be handling resolution like this.
-		FlxG.camera.width = 1920;
-		FlxG.camera.height = 1080;
-		FlxG.camera.x = -560;
-		FlxG.camera.y = -315;
-		FlxG.camera.zoom = FlxG.height / 1080;
-		
 		super.create();
 		FlxG.worldBounds.set( -100, -100, 1920 + 200, 1080 + 200);
 		
@@ -83,6 +78,8 @@ class PlayState extends FlxState
 		khonjin = new Khonjin(50, 900);
 		entitiesLayer.add(khonjin);
 		
+		FlxG.camera.follow(khonjin);
+		FlxG.camera.setScrollBounds(0, 1920, 0, 1080);
 	}
 
 	override public function update(elapsed:Float):Void
@@ -94,7 +91,7 @@ class PlayState extends FlxState
 		FlxG.collide(level, khonjin);
 		
 		if (FlxG.keys.justPressed.ESCAPE) {
-			Sys.exit(0);
+			openSubState(new PauseMenu());
 		}
 	}
 }
