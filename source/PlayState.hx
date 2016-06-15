@@ -21,6 +21,7 @@ class PlayState extends FlxState
 	private var floors:FlxGroup;
 	private var ladders:FlxGroup;
 	private var background:FlxSprite;
+	private var ladder1:Ladder;
 	private var khonjin:Khonjin;
 	private var level:FlxTilemap;
 	
@@ -71,6 +72,13 @@ class PlayState extends FlxState
 					backgroundLayer.add(background);
 			}
 		}, "EntitiesLayer");
+		
+		
+		ladders = new FlxGroup();
+		ladder1 = new Ladder(1739, 632, 111, 406, 1, 0);
+		ladder1.immovable = true;
+		ladders.add(ladder1);
+		backgroundLayer.add(ladders);
 		
 		khonjin = new Khonjin(50, 900);
 		entitiesLayer.add(khonjin);
