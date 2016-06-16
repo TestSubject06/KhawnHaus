@@ -55,11 +55,13 @@ class PauseMenu extends FlxSubState
 		});
 		options.add(resumeButton);
 		
+		#if desktop
 		var quitButton = new FlxButton(background.x + 25, background.y + 100, "Quit", function():Void {
 			//openSubState(new OptionsMenu());
 			Sys.exit(0);
 		});
 		options.add(quitButton);
+		#end
 		
 		options.forEach(function(item:FlxButton):Void {
 			item.scrollFactor.set(0, 0);

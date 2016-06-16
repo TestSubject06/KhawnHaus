@@ -23,8 +23,10 @@ class MenuState extends FlxState
 	{
 		super.update(elapsed);
 		
+		#if desktop
 		if (FlxG.keys.justPressed.ESCAPE) {
 			Sys.exit(0);
 		}
+		#end
 	}
 }

@@ -2,6 +2,7 @@ package;
 
 import flixel.FlxG;
 import flixel.FlxGame;
+import flixel.FlxState;
 import flixel.util.FlxSave;
 import openfl.display.Sprite;
 import flixel.system.scaleModes.*;
@@ -19,7 +20,16 @@ class Main extends Sprite
 			initialize(preferences);
 		}
 		
-		var game = new FlxGame(960, 540, MenuState);
+		var targetMenu:Class<FlxState>;
+		
+		#if debug
+			targetMenu = DebugMenu;
+		#else
+			targetMenu = MenuState;
+		#end 
+		
+		
+		var game = new FlxGame(960, 540, targetMenu);
 		addChild(game);
 		
 		FlxG.fullscreen = preferences.data.fullscreen;
