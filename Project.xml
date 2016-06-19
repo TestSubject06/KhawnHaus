@@ -14,13 +14,13 @@
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="800" height="600" fps="60" background="#000000" hardware="true" vsync="true" />
+	<window width="960" height="540" fps="60" background="#000000" hardware="true" vsync="true" />
 
 	<!--HTML5-specific-->
 	<window if="html5" resizable="false" />
 
 	<!--Desktop-specific-->
-	<window if="desktop" orientation="landscape" fullscreen="true" resizable="false" width="0" height="0" />
+	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" width="960" height="540" />
 
 	<!--Mobile-specific-->
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" />
@@ -36,7 +36,7 @@
 	<haxelib name="flixel" />
 
 	<!--In case you want to use the addons package-->
-	<!--<haxelib name="flixel-addons" />-->
+	<haxelib name="flixel-addons" />
 
 	<!--In case you want to use the ui package-->
 	<!--<haxelib name="flixel-ui" />-->

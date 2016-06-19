@@ -9,12 +9,13 @@ import flixel.math.FlxMath;
 
 class MenuState extends FlxState
 {
+	
 	override public function create():Void
 	{
 		super.create();
 		
 		add(new FlxButton(FlxG.width / 2, FlxG.height / 2, "Khawn Haus", function() {
-			FlxG.switchState(new PlayState());
+			FlxG.switchState(new PlayState(null));
 		}));
 	}
 
@@ -22,8 +23,10 @@ class MenuState extends FlxState
 	{
 		super.update(elapsed);
 		
+		#if desktop
 		if (FlxG.keys.justPressed.ESCAPE) {
 			Sys.exit(0);
 		}
+		#end
 	}
 }

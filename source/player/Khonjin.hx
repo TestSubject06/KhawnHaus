@@ -15,12 +15,21 @@ class Khonjin extends FlxSprite
 												//it makes things feel very nice for the player.
 	private var coyoteTime:Float = 0; 
 	
+	private var canClimb:Bool = false;
+	private var climbing:Bool = false;
+	private var ladder:Array<Float> = [0, 0, 0, 0]; 
+	
+	public var ballisticJumpVelocity:Float = 300;
+	public var maxRunSpeed(default, set):Float = 200;
+	public var runAcceleration:Float = 800;
+	public var maxFallSpeed(default, set):Float = 400;
+	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y, null);
-		makeGraphic(30, 60, 0xFFFF0000); //red rectangle
+		makeGraphic(103, 143, 0xFFFF0000); //red rectangle
 		acceleration.set(0, GlobalValues.gravity);
-		maxVelocity.set(200, 400);
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
 		drag.set(.85, .85);
 	}
 	
@@ -28,9 +37,9 @@ class Khonjin extends FlxSprite
 	{
 		//Very simple movement
 		if (FlxG.keys.pressed.LEFT) {
-			acceleration.x = -800;
+			acceleration.x = -runAcceleration;
 		}else if (FlxG.keys.pressed.RIGHT) {
-			acceleration.x = 800;
+			acceleration.x = runAcceleration;
 		}else {
 			acceleration.x = 0;
 		}
@@ -43,7 +52,7 @@ class Khonjin extends FlxSprite
 		
 		//Ballistic jump
 		if (coyoteTime > 0 && FlxG.keys.justPressed.UP) {
-			velocity.y = -300;
+			velocity.y = -ballisticJumpVelocity;
 		}
 		
 		//Slow Khawn down horizontally if he's touching the ground, and not accelerating in a horizontal direction
@@ -51,8 +60,39 @@ class Khonjin extends FlxSprite
 			velocity.x *= GlobalValues.friction;
 		}
 
+		//Attempt at ladders needs more reading
+		
+		//if overlapping with a Ladder
+		//canClimb = true else false
+		//ladder = Ladder.ladder
+		
+		//if canClimb is true and Up/Down were pressed
+		//snap position to closest point on Ladder's line (vector maths)
+		//climbing = true
+		
+		//if climbing is true and Up/Down were pressed
+		//suppress normal movement
+		//determine normalised directional vector of ladder and add to velocity
+		
+		//if center position is within 5 pixels of either endpoint of ladder
+		//climbing = false
+		
 		super.update(elapsed);
 		
+	}
+	
+	function set_maxRunSpeed(value:Float):Float 
+	{
+		maxRunSpeed = value;
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
+		return maxRunSpeed;
+	}
+	
+	function set_maxFallSpeed(value:Float):Float 
+	{
+		maxFallSpeed = value;
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
+		return maxFallSpeed;
 	}
 	
 }

@@ -1,55 +1,134 @@
 package;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.addons.editors.ogmo.FlxOgmoLoader;
 import flixel.group.FlxGroup;
 import flixel.text.FlxText;
 import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import jokes.Joke;
+import jokes.ThisGame;
+import menus.PauseMenu;
 import player.Khonjin;
+import rules.Rule;
+import rules.SlowMo;
+import rules.Speedy;
+import world.Ladder;
 
 class PlayState extends FlxState
 {
-	private var walls:FlxGroup;
-	private var khonjin:Khonjin;
-	private var level:FlxTilemap;
+	public var walls:FlxGroup;
+	public var floors:FlxGroup;
+	public var ladders:FlxGroup;
+	public var background:FlxSprite;
+	public var ladder1:Ladder;
+	public var khonjin:Khonjin;
+	public var level:FlxTilemap;
+	
+	//visual layering
+	private var backgroundLayer:FlxGroup;
+	private var entitiesLayer:FlxGroup;
+	private var foregroundLayer:FlxGroup;
+	private var uiLayer:FlxGroup;
+	
+	private var jokes:Array<Joke>;
+	private var scenario:Scenario;
+	public function new(scenario:Scenario) {
+		super();
+		if (scenario == null) {
+			this.scenario = new Scenario();
+		}else {
+			this.scenario = scenario;
+		}
+	}
 	override public function create():Void
-	{
-		super.create();
-		FlxG.worldBounds.set(-100, -100, FlxG.width + 200, FlxG.height + 200);
-		walls = new FlxGroup();
-		var floor:FlxObject = new FlxObject(5, FlxG.height, FlxG.width, 10);
-		var wall1:FlxObject = new FlxObject(-5, 0, 10, FlxG.height);
-		var wall2:FlxObject = new FlxObject(FlxG.width-5, 0, 10, FlxG.height);
-		floor.immovable = true;
-		wall1.immovable = true;
-		wall2.immovable = true;
-		walls.add(floor);
-		walls.add(wall1);
-		walls.add(wall2);
-		add(walls);
+	{		
 		
-		level = new FlxTilemap();
-		level.loadMapFromCSV(AssetPaths.SomeWalls__csv, AssetPaths.autotiles__png, 32, 32, AUTO);
+		//We shouldn't be handling resolution like this.
+		super.create();
+		FlxG.worldBounds.set( -100, -100, 1920 + 200, 1080 + 200);
+		
+		backgroundLayer = new FlxGroup();
+		entitiesLayer = new FlxGroup();
+		foregroundLayer = new FlxGroup();
+		uiLayer = new FlxGroup();
+		add(backgroundLayer);
+		add(entitiesLayer);
+		add(foregroundLayer);
+		add(uiLayer);
+		
+		var levelCreator = new FlxOgmoLoader(AssetPaths.Level1__oel);
+		level = levelCreator.loadTilemap(AssetPaths.autotiles__png, 32, 32, "TilesLayer");
 		add(level);
 		
-		khonjin = new Khonjin(50, 50);
-		add(khonjin);
+		floors = new FlxGroup();
+		
+		levelCreator.loadEntities(function(itemType:String, itemData:Xml):Void {
+			switch(itemType.toLowerCase()) {
+				case "platform":
+					var newPlatform:FlxSprite = new FlxSprite(Std.parseFloat(itemData.get("x")), Std.parseFloat(itemData.get("y")));
+					newPlatform.makeGraphic(Std.parseInt(itemData.get("width")), Std.parseInt(itemData.get("height")), 0xFFFF0000);
+					newPlatform.immovable = true;
+					floors.add(newPlatform);
+					entitiesLayer.add(newPlatform);
+				
+				case "background1":
+					background = new FlxSprite(Std.parseFloat(itemData.get("x")), Std.parseFloat(itemData.get("y")), AssetPaths.backgroundflat__png);
+					backgroundLayer.add(background);
+			}
+		}, "EntitiesLayer");
+		
+		
+		ladders = new FlxGroup();
+		ladder1 = new Ladder(1739, 632, 111, 406, 1, 0);
+		ladder1.immovable = true;
+		ladders.add(ladder1);
+		backgroundLayer.add(ladders);
+		
+		khonjin = new Khonjin(50, 900);
+		entitiesLayer.add(khonjin);
+		
+		FlxG.camera.follow(khonjin);
+		FlxG.camera.setScrollBounds(0, 1920, 0, 1080);
+		
+		for (joke in scenario.jokes) {
+			joke.setupJoke(this);
+		}
+		//for (gag in scenario.gags) {
+			//.setupJoke(this);
+		//}
+		for (rule in scenario.rules) {
+			rule.setupRule(this);
+		}
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		
+		FlxG.collide(walls, khonjin);
+		FlxG.collide(floors, khonjin);
+		FlxG.collide(level, khonjin);
+		
 		if (FlxG.keys.justPressed.ESCAPE) {
-			Sys.exit(0);
+			openSubState(new PauseMenu());
 		}
 		
-		FlxG.collide(walls, khonjin);
-		FlxG.collide(level, khonjin);
+		for (joke in scenario.jokes) {
+			joke.update(elapsed);
+		}
+	}
+	override public function draw():Void 
+	{
+		super.draw();
+		for (joke in scenario.jokes) {
+			joke.draw();
+		}
 	}
 }
