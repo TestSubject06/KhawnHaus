@@ -17,14 +17,19 @@ class Khonjin extends FlxSprite
 	
 	private var canClimb:Bool = false;
 	private var climbing:Bool = false;
-	private var ladder:Array<Float> = [0,0,0,0]; 
+	private var ladder:Array<Float> = [0, 0, 0, 0]; 
+	
+	public var ballisticJumpVelocity:Float = 300;
+	public var maxRunSpeed(default, set):Float = 200;
+	public var runAcceleration:Float = 800;
+	public var maxFallSpeed(default, set):Float = 400;
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y, null);
 		makeGraphic(103, 143, 0xFFFF0000); //red rectangle
 		acceleration.set(0, GlobalValues.gravity);
-		maxVelocity.set(200, 400);
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
 		drag.set(.85, .85);
 	}
 	
@@ -32,9 +37,9 @@ class Khonjin extends FlxSprite
 	{
 		//Very simple movement
 		if (FlxG.keys.pressed.LEFT) {
-			acceleration.x = -800;
+			acceleration.x = -runAcceleration;
 		}else if (FlxG.keys.pressed.RIGHT) {
-			acceleration.x = 800;
+			acceleration.x = runAcceleration;
 		}else {
 			acceleration.x = 0;
 		}
@@ -47,7 +52,7 @@ class Khonjin extends FlxSprite
 		
 		//Ballistic jump
 		if (coyoteTime > 0 && FlxG.keys.justPressed.UP) {
-			velocity.y = -300;
+			velocity.y = -ballisticJumpVelocity;
 		}
 		
 		//Slow Khawn down horizontally if he's touching the ground, and not accelerating in a horizontal direction
@@ -74,6 +79,20 @@ class Khonjin extends FlxSprite
 		
 		super.update(elapsed);
 		
+	}
+	
+	function set_maxRunSpeed(value:Float):Float 
+	{
+		maxRunSpeed = value;
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
+		return maxRunSpeed;
+	}
+	
+	function set_maxFallSpeed(value:Float):Float 
+	{
+		maxFallSpeed = value;
+		maxVelocity.set(maxRunSpeed, maxFallSpeed);
+		return maxFallSpeed;
 	}
 	
 }

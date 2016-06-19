@@ -15,7 +15,7 @@ class MenuState extends FlxState
 		super.create();
 		
 		add(new FlxButton(FlxG.width / 2, FlxG.height / 2, "Khawn Haus", function() {
-			FlxG.switchState(new PlayState());
+			FlxG.switchState(new PlayState(null));
 		}));
 	}
 

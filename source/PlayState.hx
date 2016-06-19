@@ -12,25 +12,41 @@ import flixel.tile.FlxTile;
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
+import jokes.Joke;
+import jokes.ThisGame;
 import menus.PauseMenu;
 import player.Khonjin;
+import rules.Rule;
+import rules.SlowMo;
+import rules.Speedy;
 import world.Ladder;
 
 class PlayState extends FlxState
 {
-	private var walls:FlxGroup;
-	private var floors:FlxGroup;
-	private var ladders:FlxGroup;
-	private var background:FlxSprite;
-	private var ladder1:Ladder;
-	private var khonjin:Khonjin;
-	private var level:FlxTilemap;
+	public var walls:FlxGroup;
+	public var floors:FlxGroup;
+	public var ladders:FlxGroup;
+	public var background:FlxSprite;
+	public var ladder1:Ladder;
+	public var khonjin:Khonjin;
+	public var level:FlxTilemap;
 	
 	//visual layering
 	private var backgroundLayer:FlxGroup;
 	private var entitiesLayer:FlxGroup;
 	private var foregroundLayer:FlxGroup;
 	private var uiLayer:FlxGroup;
+	
+	private var jokes:Array<Joke>;
+	private var scenario:Scenario;
+	public function new(scenario:Scenario) {
+		super();
+		if (scenario == null) {
+			this.scenario = new Scenario();
+		}else {
+			this.scenario = scenario;
+		}
+	}
 	override public function create():Void
 	{		
 		
@@ -80,6 +96,16 @@ class PlayState extends FlxState
 		
 		FlxG.camera.follow(khonjin);
 		FlxG.camera.setScrollBounds(0, 1920, 0, 1080);
+		
+		for (joke in scenario.jokes) {
+			joke.setupJoke(this);
+		}
+		//for (gag in scenario.gags) {
+			//.setupJoke(this);
+		//}
+		for (rule in scenario.rules) {
+			rule.setupRule(this);
+		}
 	}
 
 	override public function update(elapsed:Float):Void
@@ -92,6 +118,17 @@ class PlayState extends FlxState
 		
 		if (FlxG.keys.justPressed.ESCAPE) {
 			openSubState(new PauseMenu());
+		}
+		
+		for (joke in scenario.jokes) {
+			joke.update(elapsed);
+		}
+	}
+	override public function draw():Void 
+	{
+		super.draw();
+		for (joke in scenario.jokes) {
+			joke.draw();
 		}
 	}
 }

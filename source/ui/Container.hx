@@ -42,6 +42,8 @@ class Container extends FlxGroup
 	
 	public var layout(default, set):ContainerLayout;
 	
+	private var movables:Array<Movable>;
+	
 	//This will be linked when this container is added to another container.
 	public var parent:Container;
 	private var reflowIsLocked:Bool;
@@ -56,17 +58,18 @@ class Container extends FlxGroup
 	public function new(layout:ContainerLayout, width:Float = 0, height:Float = 0, x:Float = 0, y:Float = 0) 
 	{
 		super();
+		
+		movables = [];
+		innerPadding = new FlxRect(0, 0, 0, 0);
+		spacing = 5;
+		reflowIsLocked = false;
+		this.layout = layout;
+		this.layout.container = this;
+		
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		
-		this.layout = layout;
-		this.layout.container = this;
-		
-		innerPadding = new FlxRect(0, 0, 0, 0);
-		spacing = 5;
-		reflowIsLocked = false;
 	}
 	
 	override public function add(object:FlxBasic):FlxBasic 
@@ -74,22 +77,29 @@ class Container extends FlxGroup
 		super.add(object);
 		
 		//Check and see if it's a positionable object
-		if (Std.is(object, FlxSprite)) {
-			var sprite:FlxSprite = cast (object, FlxSprite);
+		var doReflow:Bool = false;
+		if (Std.is(object, FlxObject)) {
+			var flxobject:FlxObject = cast (object, FlxObject);
+			movables.push(flxobject);
+			doReflow = true;
 		}
 		
 		if (Std.is(object, Container)) {
 			var container:Container = cast (object, Container);
 			container.parent = this;
+			movables.push(container);
+			doReflow = true;
 		}
 		
-		reflow();
+		if(doReflow) {
+			reflow();
+		}
 		return object;
 	}
-	//TODO: Reflow, add
 	
+	//TODO: Inner Padding, Multi-line wrapping mode
 	public function reflow():Void {
-		if (members.length <= 0 || reflowIsLocked) {
+		if (movables.length <= 0 || reflowIsLocked) {
 			return;
 		}
 		//For each thing we have, start shifting things around.
@@ -113,10 +123,7 @@ class Container extends FlxGroup
 		//Pass 1, collect size information, and resize as necessary
 		var newWidth:Float = 0;
 		var newHeight:Float = 0;
-		for (item in members) {
-			//We stuff the FlxBasic item into a Dynamic variable so that we can just 'assume' properties
-			var movable:Movable = castToMovable(item);
-			
+		for (movable in movables) {
 			if (layout.direction == ContainerLayout.HORIZONTAL) {
 				newWidth += movable.width + spacing;
 				newHeight = Math.max(newHeight, movable.height);
@@ -129,21 +136,18 @@ class Container extends FlxGroup
 		newWidth -= layout.direction == ContainerLayout.HORIZONTAL ? spacing : 0;
 		newHeight -= layout.direction == ContainerLayout.HORIZONTAL ? 0 : spacing;
 		var doReflow:Bool = false;
-		if (newWidth > width || newHeight > height) {
+		if (newWidth + innerPadding.x + innerPadding.width > width || newHeight + innerPadding.y + innerPadding.height > height) {
 			doReflow = true;
 		}
 		
 		//We either take the new size, or the old size
-		width = Math.max(width, newWidth);
-		height = Math.max(height, newHeight);
+		width = Math.max(width, newWidth + innerPadding.x + innerPadding.width);
+		height = Math.max(height, newHeight + innerPadding.y + innerPadding.height);
 			
 		//The same thing applies transposed to Vertical alignment things
 		var row:Array<Movable> = [];
 		var rowExtents:FlxRect = new FlxRect(Math.floor(width * (layout.horizontalAlignment / 2)), Math.floor(height * (layout.verticalAlignment / 2)), -spacing, -spacing);
-		for (item in members) {
-			//We stuff the FlxBasic item into an inferred variable so that we can just 'assume' properties
-			var movable:Movable = castToMovable(item);
-			
+		for (movable in movables) {
 			if (layout.direction == ContainerLayout.HORIZONTAL) {
 				movable.x = x + innerPadding.x + rowExtents.x + rowExtents.width + spacing - Math.floor(movable.width * (layout.horizontalAlignment / 2));
 				movable.y = y + innerPadding.y + rowExtents.y - Math.floor(movable.height * (layout.verticalAlignment / 2));
@@ -191,10 +195,7 @@ class Container extends FlxGroup
 	}
 	
 	private function reposition(dx:Float, dy:Float):Void {
-		
-		for (item in members) {
-			var movable:Movable = castToMovable(item);
-			
+		for (movable in movables) {
 			movable.x -= dx;
 			movable.y -= dy;
 		}
