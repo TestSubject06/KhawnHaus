@@ -26,19 +26,27 @@ class Khonjin extends FlxSprite
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
-		super(X, Y, null);
-		makeGraphic(103, 143, 0xFFFF0000); //red rectangle
+		super(X, Y, AssetPaths.khonjinsprite__png);
+		
+		//makeGraphic(103, 143, 0xFFFF0000); //red rectangle
 		acceleration.set(0, GlobalValues.gravity);
 		maxVelocity.set(maxRunSpeed, maxFallSpeed);
 		drag.set(.85, .85);
+		
+		setFacingFlip(FlxObject.LEFT, true, false);
+		setFacingFlip(FlxObject.RIGHT, false, false);
+		scale.set(0.6, 0.6);
+		updateHitbox();
 	}
 	
 	override public function update(elapsed:Float):Void 
 	{
 		//Very simple movement
 		if (FlxG.keys.pressed.LEFT) {
+			facing = FlxObject.LEFT;
 			acceleration.x = -runAcceleration;
 		}else if (FlxG.keys.pressed.RIGHT) {
+			facing = FlxObject.RIGHT;
 			acceleration.x = runAcceleration;
 		}else {
 			acceleration.x = 0;
@@ -53,6 +61,7 @@ class Khonjin extends FlxSprite
 		//Ballistic jump
 		if (coyoteTime > 0 && FlxG.keys.justPressed.UP) {
 			velocity.y = -ballisticJumpVelocity;
+			coyoteTime = 0;//prevents super fast double jumps
 		}
 		
 		//Slow Khawn down horizontally if he's touching the ground, and not accelerating in a horizontal direction

@@ -49,7 +49,7 @@ class DebugMenu extends FlxState
 		//TODO: Finish up the menu
 		var options:Map<String, Array<String>> = new Map();
 		trace(RuleFactory.getAllRuleNames());
-		options.set("Level Type", ["Flat", "Pit"]);
+		options.set("Level Type", ["Old", "New"]);
 		options.set("Primary Objective", ["Dunk", "Cross", "Board"]);
 		options.set("Rules", RuleFactory.getAllRuleNames());
 		options.set("Gags", ["Pipe Blast", "Moving Pit"]);
@@ -126,7 +126,7 @@ class DebugMenu extends FlxState
 	private function updateScenario(category:String, value:String):Void {
 		switch(category) {
 			case "Level Type":
-				scenario.levelType = ["Flat", "Pit"].indexOf(value);
+				scenario.levelType = ["Old", "New"].indexOf(value);
 			
 			case "Primary Objective":
 				scenario.objective = ["Dunk", "Cross", "Board"].indexOf(value);
