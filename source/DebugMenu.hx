@@ -12,6 +12,7 @@ import jokes.Joke;
 import jokes.JokeFactory;
 import jokes.ThisGame;
 import rules.RuleFactory;
+import gags.GagFactory;
 import ui.Container;
 import ui.ContainerLayout;
 
@@ -52,7 +53,7 @@ class DebugMenu extends FlxState
 		options.set("Level Type", ["Old", "New"]);
 		options.set("Primary Objective", ["Dunk", "Cross", "Board"]);
 		options.set("Rules", RuleFactory.getAllRuleNames());
-		options.set("Gags", ["Pipe Blast", "Moving Pit"]);
+		options.set("Gags", GagFactory.getAllGagNames());
 		options.set("Jokes", JokeFactory.getAllJokeNames());
 		var sections:Array<Dynamic> = [ { title:"Level Type", type:"single_select" }, { title:"Primary Objective", type:"single_select" }, { title:"Rules", type:"multi_select" }, 
 										{title:"Gags", type:"multi_select"}, {title:"Jokes", type:"multi_select"}];
@@ -121,6 +122,12 @@ class DebugMenu extends FlxState
 			FlxG.switchState(new PlayState(scenario));
 		});
 		add(goButton);
+		
+		#if flash
+			
+		#else
+			FlxG.sound.playMusic(AssetPaths.robocop3__ogg);
+		#end
 	}
 	
 	private function updateScenario(category:String, value:String):Void {
@@ -142,7 +149,7 @@ class DebugMenu extends FlxState
 				scenario.rules.push(RuleFactory.getRuleByName(value));
 			
 			case "Gags":
-				//Do nothing for now
+				scenario.gags.push(GagFactory.getGagByName(value));
 				
 			case "Jokes":
 				scenario.jokes.push(JokeFactory.getJokeByName(value));

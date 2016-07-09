@@ -4,16 +4,11 @@ package gags;
  * ...
  * @author Zack
  */
-class Gag
+interface Gag
 {
 	public var name(default, null):String;
-	public function new() 
-	{
-		
-	}
-	
-	public function update(elapsed:Float):Void {
-		
-	}
-	
+	public function setupGag(state:PlayState):Void;
+	public function tearDownGag(state:PlayState):Void;
+	public function update(elapsed:Float):Void;
+	public function draw():Void;
 }

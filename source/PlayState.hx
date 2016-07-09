@@ -33,10 +33,10 @@ class PlayState extends FlxState
 	public var level:FlxTilemap;
 	
 	//visual layering
-	private var backgroundLayer:FlxGroup;
-	private var entitiesLayer:FlxGroup;
-	private var foregroundLayer:FlxGroup;
-	private var uiLayer:FlxGroup;
+	public var backgroundLayer:FlxGroup;
+	public var entitiesLayer:FlxGroup;
+	public var foregroundLayer:FlxGroup;
+	public var uiLayer:FlxGroup;
 	
 	private var jokes:Array<Joke>;
 	private var scenario:Scenario;
@@ -66,9 +66,10 @@ class PlayState extends FlxState
 		var levelCreator = new FlxOgmoLoader(getLevelFromScenario(scenario));
 		level = levelCreator.loadTilemap(AssetPaths.autotiles__png, 32, 32, "TilesLayer");
 		add(level);
-		FlxG.worldBounds.set( -200, -200, levelCreator.width + 200, levelCreator.height + 200);
+		FlxG.worldBounds.set( -200, -200, levelCreator.width + 400, levelCreator.height + 400);
 		
 		floors = new FlxGroup();
+		walls = new FlxGroup();
 		
 		levelCreator.loadEntities(function(itemType:String, itemData:Xml):Void {
 			switch(itemType.toLowerCase()) {
@@ -78,6 +79,14 @@ class PlayState extends FlxState
 					newPlatform.immovable = true;
 					newPlatform.visible = false;
 					floors.add(newPlatform);
+					entitiesLayer.add(newPlatform);
+				
+				case "wall":
+					var newPlatform:FlxSprite = new FlxSprite(Std.parseFloat(itemData.get("x")), Std.parseFloat(itemData.get("y")));
+					newPlatform.makeGraphic(Std.parseInt(itemData.get("width")), Std.parseInt(itemData.get("height")), 0xFFFF0000);
+					newPlatform.immovable = true;
+					newPlatform.visible = false;
+					walls.add(newPlatform);
 					entitiesLayer.add(newPlatform);
 				
 				case "background1":
@@ -111,12 +120,18 @@ class PlayState extends FlxState
 		for (joke in scenario.jokes) {
 			joke.setupJoke(this);
 		}
-		//for (gag in scenario.gags) {
-			//.setupJoke(this);
-		//}
+		for (gag in scenario.gags) {
+			gag.setupGag(this);
+		}
 		for (rule in scenario.rules) {
 			rule.setupRule(this);
 		}
+		
+		#if flash
+			FlxG.sound.playMusic(AssetPaths.Khonjin_House_The_Movie_2_The_Game__mp3);
+		#else
+			FlxG.sound.playMusic(AssetPaths.Khonjin_House_The_Movie_2_The_Game__ogg);
+		#end
 	}
 	
 	private function getLevelFromScenario(scenario:Scenario):Dynamic {
@@ -145,6 +160,9 @@ class PlayState extends FlxState
 		
 		for (joke in scenario.jokes) {
 			joke.update(elapsed);
+		}
+		for (gag in scenario.gags) {
+			gag.update(elapsed);
 		}
 	}
 	override public function draw():Void 
